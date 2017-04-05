@@ -14,6 +14,10 @@ a separate file. One especially huge advantage is that it can add a `#line`
 preprocessor to the file, effectively giving you accurate line numbers and file
 names on error messages.
 
+Note that a relative path is resolved in the directories in the
+`houdini_iccp.path` list, except that the parent directory of
+`hou.hipFile.path()` is checked first.
+
 ## Structure
 
     _mylib.icpp/
@@ -35,3 +39,14 @@ import sys
 sys.path.append("C:/Users/niklas/repos/houdini-icpp")  # Path to where you placed the code
 sys.path_importer_cache.clear()
 ```
+
+## Examples
+
+```python
+from houdini_icpp import library
+
+_hello = library('examples/01_hello.icpp')
+_hello.sayHello()
+```
+
+![](https://i.imgur.com/O7Dc79G.png)

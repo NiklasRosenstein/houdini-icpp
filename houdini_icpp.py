@@ -33,6 +33,9 @@ import json
 import os
 
 
+path = [os.path.dirname(__file__)]
+
+
 @contextlib.contextmanager
 def swapmember(obj, member, new_value):
   old_value = getattr(obj, member)
@@ -72,7 +75,15 @@ def library(directory, name=None):
   """
 
   if not os.path.isabs(directory):
-    directory = os.path.join(os.path.dirname(hou.hipFile.path()), directory)
+    search_path = [os.path.dirname(hou.hipFile.path())] + path
+    for search_dir in search_path:
+      new_dir = os.path.join(search_dir, directory)
+      if os.path.isdir(new_dir):
+        directory = new_dir
+        break
+    else:
+      raise ValueError('Could not find {!r}'.format(directory))
+
   if not name:
     name = os.path.splitext(os.path.basename(directory))[0]
 
@@ -99,6 +110,9 @@ def library(directory, name=None):
         content = fp.read()
         content = '\n#line 1 "{}"\n'.format(fname) + content
         functions.append(content)
+
+  if not functions:
+    raise ValueError('no .cpp files in {!r}'.format(directory))
 
   with swapmember(cppinline, '_CPPFunction', iCPPFunction):
     return inlinecpp.createLibrary(
